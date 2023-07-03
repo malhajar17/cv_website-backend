@@ -1,0 +1,2 @@
+[console_scripts]
+service_utils = service_utils.app:main

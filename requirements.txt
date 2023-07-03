@@ -1,0 +1,10 @@
+azure-cognitiveservices-speech==1.25.0
+Flask==2.3.2
+Flask_Cors==4.0.0
+openai==0.27.2
+openai_whisper==20230314
+pydub==0.25.1
+Requests==2.31.0
+setuptools==67.6.1
+whisper==1.1.10
+gunicorn==20.1.0
