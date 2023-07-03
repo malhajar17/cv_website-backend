@@ -35,7 +35,7 @@ def text_to_speech(text):
     # Creates an instance of a speech config with specified subscription key and service region.
     speech_key = auth.AZURE_COGNITIVE_TOKEN
     service_region = "eastus"
-    path = os.path.join(__file__, paths.GENERATED_SPEECH_PATH)
+    path = os.path.join(os.getcwd(), paths.GENERATED_SPEECH_PATH)
 
     audio_config = speechsdk.audio.AudioOutputConfig(use_default_speaker=False, filename=path)
     speech_config = speechsdk.SpeechConfig(subscription=speech_key, region=service_region)
@@ -50,7 +50,7 @@ def text_to_speech(text):
 
 def speech_to_text():
     model = whisper.load_model("base.en")
-    path = os.path.join(__file__, paths.RECORDED_SPEECH_PATH)
+    path = os.path.join(os.getcwd(), paths.RECORDED_SPEECH_PATH)
 
     transcription = whisper.transcribe(model, path)
     return transcription["text"]
