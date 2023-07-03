@@ -15,14 +15,13 @@ def convert_webm_to_wav(webm_path, wav_path):
 
 
 def allowed_file(filename):
-    return '.' in filename and filename.rsplit('.', 1)[1].lower() == 'webm'
+    return "." in filename and filename.rsplit(".", 1)[1].lower() == "webm"
+
 
 def generate_text(First_user_message, model="gpt-4", temperature=0.7):
     prompt = prompts.MOHAMAD_PERSONA_PROMPT
-    
-    messages = [{"role": "system", "content": prompt},
-                {"role": "assistant", "content": First_user_message}
-                ]
+
+    messages = [{"role": "system", "content": prompt}, {"role": "assistant", "content": First_user_message}]
     response = openai.ChatCompletion.create(
         model=model,
         messages=messages,
@@ -31,25 +30,27 @@ def generate_text(First_user_message, model="gpt-4", temperature=0.7):
     )
     return response.choices[0].message["content"]
 
+
 def text_to_speech(text):
-    #Creates an instance of a speech config with specified subscription key and service region.
+    # Creates an instance of a speech config with specified subscription key and service region.
     speech_key = auth.AZURE_COGNITIVE_TOKEN
     service_region = "eastus"
-    path = os.path.join(os.getcwd(), paths.GENERATED_SPEECH_PATH)
-    
-    audio_config = speechsdk.audio.AudioOutputConfig(use_default_speaker = False,filename=path)
+    path = os.path.join(__file__, paths.GENERATED_SPEECH_PATH)
+
+    audio_config = speechsdk.audio.AudioOutputConfig(use_default_speaker=False, filename=path)
     speech_config = speechsdk.SpeechConfig(subscription=speech_key, region=service_region)
     # Note: the voice setting will not overwrite the voice element in input SSML.
     speech_config.speech_synthesis_voice_name = "en-US-DavisNeural"
-    speech_config.speech_synthesis_language = "en-US" 
+    speech_config.speech_synthesis_language = "en-US"
     # use the default speaker as audio output.
-    speech_synthesizer = speechsdk.SpeechSynthesizer(speech_config=speech_config,audio_config=audio_config)
+    speech_synthesizer = speechsdk.SpeechSynthesizer(speech_config=speech_config, audio_config=audio_config)
 
     speech_synthesizer.speak_text(text)
 
+
 def speech_to_text():
     model = whisper.load_model("base.en")
-    path = os.path.join(os.getcwd(), paths.RECORDED_SPEECH_PATH)
+    path = os.path.join(__file__, paths.RECORDED_SPEECH_PATH)
 
-    transcription = whisper.transcribe(model,path)
+    transcription = whisper.transcribe(model, path)
     return transcription["text"]
