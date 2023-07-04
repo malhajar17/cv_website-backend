@@ -46,7 +46,7 @@ def process_data():
 
 @app.route("/interview_registration", methods=["POST"])
 def interview_request():
-    account_ready = databaseUtils.create_account(data=request.get_json())
+    account_ready = databaseUtils.create_account(request.get_json())
     if account_ready:
         return jsonify({"get_auth_ready": True})
     else:
