@@ -33,7 +33,7 @@ def generate_text(First_user_message, model="gpt-4", temperature=0.7):
 
 def text_to_speech(text):
     # Creates an instance of a speech config with specified subscription key and service region.
-    speech_key = auth.AZURE_COGNITIVE_TOKEN
+    speech_key = os.environ.get("AZURE_COGNITIVE_TOKEN")
     service_region = "eastus"
     path = os.path.join(os.getcwd(), paths.GENERATED_SPEECH_PATH)
 
