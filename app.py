@@ -8,6 +8,7 @@ from flask_cors import CORS
 import constants.authTokens as auth
 import constants.paths as paths
 import service_utils.databaseUtils as databaseUtils
+import service_utils.authUtils as auth
 from service_utils import recordingutils
 from service_utils.authUtils import require_token
 import os
@@ -55,25 +56,10 @@ def interview_request():
         return jsonify({"get_auth_ready": False})
 
 
-@app.route("/authnticate_interview", methods=["GET"])
-def authnticate_interview():
-    # Extract the required fields from the JSON data
-    first_name = request.args.get("first_name")
-    last_name = request.args.get("last_name")
-
-    # Concatenate the first name and last name
-    name = f"{first_name} {last_name}"
-    # Check if the user is restricted
-    is_restricted = databaseUtils.is_prohibited_user(first_name, last_name)
-    if is_restricted:
-        # User is restricted, return a specific token or value indicating the restriction
-        return {"restriction_token": "RESTRICTED"}
-    # Generate the payload with the name or any additional data you want to include
-    payload = {"name": name}
-
-    # Sign the token with the secret key
-    auth_token = jwt.encode(payload, os.environ.get("SECRET_KEY"), algorithm="HS256")
-    return {"auth_token": auth_token}
+@app.route("/authenticate_interview", methods=["GET"])
+@require_token
+def authenticate_interview():
+    return auth.authenticate_interview(request)
 
 
 # Send Get
