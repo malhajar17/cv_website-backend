@@ -19,9 +19,6 @@ app = Flask(__name__)
 CORS(app)
 
 
-openai.api_key = auth.OPENAI_TOKEN
-
-
 @app.route("/session_recording", methods=["POST"])
 def process_data():
     if "file" not in request.files:
@@ -66,6 +63,7 @@ def authenticate_interview():
 @app.route("/generate_response", methods=["GET"])
 @require_token
 def get_audio_response():
+    openai.api_key = os.environ.get("OPENAI_TOKEN")
     First_user_message = recordingutils.speech_to_text()
     generated_text = recordingutils.generate_text(First_user_message)
     recordingutils.text_to_speech(generated_text)
