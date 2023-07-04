@@ -62,7 +62,7 @@ def create_account(user_data):
         # Check if the user already exists
         if user_exists(connection, user_data["firstName"], user_data["lastName"]):
             print("User already exists")
-            return
+            return True
 
         # Insert the new user into the database
         insert_query = (
