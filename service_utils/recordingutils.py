@@ -18,7 +18,7 @@ def allowed_file(filename):
     return "." in filename and filename.rsplit(".", 1)[1].lower() == "webm"
 
 
-def generate_text(First_user_message, model="gpt-4", temperature=0.7):
+def generate_text(First_user_message, model="gpt-3.5", temperature=0.3):
     prompt = prompts.MOHAMAD_PERSONA_PROMPT
 
     messages = [{"role": "system", "content": prompt}, {"role": "assistant", "content": First_user_message}]
@@ -49,7 +49,7 @@ def text_to_speech(text):
 
 
 def speech_to_text():
-    model = whisper.load_model("base.en")
+    model = whisper.load_model("small.en")
     path = os.path.join(os.getcwd(), paths.RECORDED_SPEECH_PATH)
 
     transcription = whisper.transcribe(model, path)
