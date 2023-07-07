@@ -49,7 +49,7 @@ def text_to_speech(text):
 
 
 def speech_to_text():
-    model = whisper.load_model("small.en")
+    model = whisper.load_model(os.environ.get("WHISPER_MODEL"))
     path = os.path.join(os.getcwd(), paths.RECORDED_SPEECH_PATH)
 
     transcription = whisper.transcribe(model, path)
