@@ -18,7 +18,7 @@ def allowed_file(filename):
     return "." in filename and filename.rsplit(".", 1)[1].lower() == "webm"
 
 
-def generate_text(First_user_message, model="gpt-3.5", temperature=0.3):
+def generate_text(First_user_message, model=os.environ.get("OPEN_AI_MODULE"), temperature=0.3):
     prompt = prompts.MOHAMAD_PERSONA_PROMPT
 
     messages = [{"role": "system", "content": prompt}, {"role": "assistant", "content": First_user_message}]
