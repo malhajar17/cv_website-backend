@@ -10,7 +10,11 @@ import constants.prompts as prompts
 
 
 def convert_webm_to_wav(webm_path, wav_path):
-    audio = AudioSegment.from_file(webm_path, format="mp3")
+    try:
+        audio = AudioSegment.from_file(webm_path, "mp3")
+    except:
+        audio = AudioSegment.from_file(webm_path, format="mp4")
+
     audio.export(wav_path, format="wav")
 
 
