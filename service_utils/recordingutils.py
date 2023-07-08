@@ -16,7 +16,7 @@ def convert_webm_to_wav(input_path, wav_path):
 
 
 def allowed_file(filename):
-    return "." in filename and filename.rsplit(".", 1)[1].lower() in ["mp3", "mp4", "webm"]
+    return True
 
 
 
