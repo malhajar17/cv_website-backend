@@ -9,17 +9,15 @@ import constants.paths as paths
 import constants.prompts as prompts
 
 
-def convert_webm_to_wav(webm_path, wav_path):
-    try:
-        audio = AudioSegment.from_file(webm_path, "mp3")
-    except:
-        audio = AudioSegment.from_file(webm_path, format="mp4")
-
+def convert_webm_to_wav(input_path, wav_path):
+    extension = input_path.rsplit(".", 1)[1].lower()
+    audio = AudioSegment.from_file(input_path, format=extension)
     audio.export(wav_path, format="wav")
 
 
 def allowed_file(filename):
-    return "." in filename and filename.rsplit(".", 1)[1].lower() == "mp3"
+    return "." in filename and filename.rsplit(".", 1)[1].lower() in ["mp3", "mp4", "webm"]
+
 
 
 def generate_text(First_user_message, model=os.environ.get("OPEN_AI_MODULE"), temperature=0.3):
