@@ -15,7 +15,7 @@ def convert_webm_to_wav(webm_path, wav_path):
 
 
 def allowed_file(filename):
-    return "." in filename and filename.rsplit(".", 1)[1].lower() == "webm"
+    return "." in filename and filename.rsplit(".", 1)[1].lower() == "mp3"
 
 
 def generate_text(First_user_message, model=os.environ.get("OPEN_AI_MODULE"), temperature=0.3):
