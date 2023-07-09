@@ -25,6 +25,7 @@ def process_data():
         return jsonify({"error": "No file provided"}), 400
 
     file = request.files["file"]
+
     if file.filename == "":
         return jsonify({"error": "No file selected"}), 400
 
@@ -34,6 +35,7 @@ def process_data():
 
         # convert the webm file to a wav file
         wav_path = os.path.splitext(file_path)[0] + ".wav"
+        print(file.content_type)
         recordingutils.convert_webm_to_wav(file_path, wav_path)
         # remove the webm file
         os.remove(file_path)

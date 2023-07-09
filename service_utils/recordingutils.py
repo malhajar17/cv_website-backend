@@ -3,16 +3,27 @@ import azure.cognitiveservices.speech as speechsdk
 import openai
 import whisper
 from pydub import AudioSegment
+import ffmpeg
 
 import constants.authTokens as auth
 import constants.paths as paths
 import constants.prompts as prompts
 
+def _mime_to_format(mime_type):
+    mime_to_format_map = {
+        "audio/mp3": "mp3",
+        "audio/mp4": "mp4",
+        "audio/webm": "webm",
+        "application/octet-stream": "mp3",  # Assuming mp3 as default for octet-stream
+    }
+
+    return mime_to_format_map.get(mime_type, "mp3")  # "mp3" as default for unknown mime types
 
 def convert_webm_to_wav(input_path, wav_path):
-    extension = input_path.rsplit(".", 1)[1].lower()
-    audio = AudioSegment.from_file(input_path, format=extension)
-    audio.export(wav_path, format="wav")
+    # Check if output file already exists, if so, delete it
+    if os.path.exists(wav_path):
+        os.remove(wav_path)
+    ffmpeg.input(input_path).output(wav_path, format='wav').run()
 
 
 def allowed_file(filename):
