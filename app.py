@@ -50,6 +50,8 @@ def process_data():
 def interview_request():
     account_ready = databaseUtils.create_account(request.get_json())
     if account_ready:
+        short_audio_file_path = os.path.join(os.getcwd(), 'resources', 'silence.wav')
+        recordingutils.speech_to_text(short_audio_file_path)
         return jsonify({"get_auth_ready": True})
     else:
         return jsonify({"get_auth_ready": False})
