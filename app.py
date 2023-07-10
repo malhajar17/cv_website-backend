@@ -59,13 +59,13 @@ def interview_request():
 def authenticate_interview():
     return auth.authenticate_interview(request)
 
-
+# hi
 # Send Get
 @app.route("/generate_response", methods=["GET"])
 @require_token
 def get_audio_response():
     openai.api_key = os.environ.get("OPENAI_TOKEN")
-    First_user_message = recordingutils.speech_to_text(model)
+    First_user_message = recordingutils.speech_to_text()
     generated_text = recordingutils.generate_text(First_user_message)
     recordingutils.text_to_speech(generated_text)
     return send_file(paths.GENERATED_SPEECH_PATH, as_attachment=True)
