@@ -18,12 +18,6 @@ import whisper
 app = Flask(__name__)
 CORS(app)
 
-# Send an empty recording to warmup whisper on startup
-
-model = whisper.load_model(os.environ.get("WHISPR_MODEL"))
-file_path = os.path.join(os.getcwd(), "resources/client_side_recordings", "silence.wav")
-empty_transcription = whisper.transcribe(model, file_path)
-
 @app.route("/session_recording", methods=["POST"])
 def process_data():
     if "file" not in request.files:
