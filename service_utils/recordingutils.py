@@ -61,9 +61,14 @@ def text_to_speech(text):
     speech_synthesizer.speak_text(text)
 
 
-def speech_to_text():
+def speech_to_text(model):
     model = whisper.load_model(os.environ.get("WHISPER_MODEL"))
     path = os.path.join(os.getcwd(), paths.RECORDED_SPEECH_PATH)
 
     transcription = whisper.transcribe(model, path)
     return transcription["text"]
+
+def speech_to_text_warmup(path):
+        model = whisper.load_model(os.environ.get("WHISPER_MODEL"))
+        transcription = whisper.transcribe(model, path)
+        return model

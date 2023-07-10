@@ -12,12 +12,17 @@ import service_utils.authUtils as auth
 from service_utils import recordingutils
 from service_utils.authUtils import require_token
 import os
-
+import whisper
 # DONT FORGET TO REMOVE BEFORE DEPLOYING
 
 app = Flask(__name__)
 CORS(app)
 
+# Send an empty recording to warmup whisper on startup
+
+model = whisper.load_model(os.environ.get("WHISPR_MODEL"))
+file_path = os.path.join(os.getcwd(), "resources/client_side_recordings", "silence.wav")
+empty_transcription = whisper.transcribe(model, file_path)
 
 @app.route("/session_recording", methods=["POST"])
 def process_data():
@@ -50,8 +55,6 @@ def process_data():
 def interview_request():
     account_ready = databaseUtils.create_account(request.get_json())
     if account_ready:
-        short_audio_file_path = os.path.join(os.getcwd(), 'resources', 'silence.wav')
-        recordingutils.speech_to_text(short_audio_file_path)
         return jsonify({"get_auth_ready": True})
     else:
         return jsonify({"get_auth_ready": False})
@@ -68,7 +71,7 @@ def authenticate_interview():
 @require_token
 def get_audio_response():
     openai.api_key = os.environ.get("OPENAI_TOKEN")
-    First_user_message = recordingutils.speech_to_text()
+    First_user_message = recordingutils.speech_to_text(model)
     generated_text = recordingutils.generate_text(First_user_message)
     recordingutils.text_to_speech(generated_text)
     return send_file(paths.GENERATED_SPEECH_PATH, as_attachment=True)
