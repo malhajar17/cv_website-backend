@@ -17,6 +17,17 @@ import whisper
 
 app = Flask(__name__)
 CORS(app)
+model = None
+
+@app.route('/warmup-model', methods=['GET'])
+@require_token
+def warmup_model():
+    global model
+    if model is None:
+        model = whisper.load_model(os.environ.get("WHISPR_MODEL"))
+        file_path = os.path.join(os.getcwd(), "resources/client_side_recordings", "silence.wav")
+        whisper.transcribe(model, file_path)
+    return jsonify({"status": "Whisper model warmed up"})
 
 @app.route("/session_recording", methods=["POST"])
 def process_data():
@@ -65,7 +76,7 @@ def authenticate_interview():
 @require_token
 def get_audio_response():
     openai.api_key = os.environ.get("OPENAI_TOKEN")
-    First_user_message = recordingutils.speech_to_text()
+    First_user_message = recordingutils.speech_to_text(model)
     generated_text = recordingutils.generate_text(First_user_message)
     recordingutils.text_to_speech(generated_text)
     return send_file(paths.GENERATED_SPEECH_PATH, as_attachment=True)
