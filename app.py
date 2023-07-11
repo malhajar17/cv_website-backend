@@ -24,7 +24,7 @@ model = None
 def warmup_model():
     global model
     if model is None:
-        model = whisper.load_model(os.environ.get("WHISPR_MODEL"))
+        model = whisper.load_model(os.environ.get("WHISPER_MODEL"))
         file_path = os.path.join(os.getcwd(), "resources/client_side_recordings", "silence.wav")
         whisper.transcribe(model, file_path)
     return jsonify({"status": "Whisper model warmed up"})
@@ -70,7 +70,6 @@ def interview_request():
 def authenticate_interview():
     return auth.authenticate_interview(request)
 
-# hi
 # Send Get
 @app.route("/generate_response", methods=["GET"])
 @require_token
