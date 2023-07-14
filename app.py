@@ -85,7 +85,7 @@ def get_audio_response():
     First_user_message = recordingUtils.speech_to_text()
     generated_text = recordingUtils.generate_text(First_user_message)
     recordingUtils.text_to_speech(generated_text)
-    return send_file(paths.GENERATED_SPEECH_PATH, as_attachment=True)
+    return send_file(paths.GENERATED_SPEECH_PATH + "gs_.wav", as_attachment=True)
 
 
 if __name__ == "__main__":
