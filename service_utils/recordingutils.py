@@ -1,23 +1,14 @@
 import os
+
 import azure.cognitiveservices.speech as speechsdk
+import ffmpeg
 import openai
 import whisper
-from pydub import AudioSegment
-import ffmpeg
 
-import constants.authTokens as auth
 import constants.paths as paths
 import constants.prompts as prompts
+from models.user_session_info import UserSessionInfo
 
-def _mime_to_format(mime_type):
-    mime_to_format_map = {
-        "audio/mp3": "mp3",
-        "audio/mp4": "mp4",
-        "audio/webm": "webm",
-        "application/octet-stream": "mp3",  # Assuming mp3 as default for octet-stream
-    }
-
-    return mime_to_format_map.get(mime_type, "mp3")  # "mp3" as default for unknown mime types
 
 def convert_webm_to_wav(input_path, wav_path):
     # Check if output file already exists, if so, delete it
@@ -48,7 +39,8 @@ def text_to_speech(text):
     # Creates an instance of a speech config with specified subscription key and service region.
     speech_key = os.environ.get("AZURE_COGNITIVE_TOKEN")
     service_region = "eastus"
-    path = os.path.join(os.getcwd(), paths.GENERATED_SPEECH_PATH)
+    file_name = "gs_" 
+    path = os.path.join(os.getcwd(), paths.GENERATED_SPEECH_PATH + file_name + ".wav")
 
     audio_config = speechsdk.audio.AudioOutputConfig(use_default_speaker=False, filename=path)
     speech_config = speechsdk.SpeechConfig(subscription=speech_key, region=service_region)
@@ -61,7 +53,10 @@ def text_to_speech(text):
     speech_synthesizer.speak_text(text)
 
 
-def speech_to_text(model):
-    path = os.path.join(os.getcwd(), paths.RECORDED_SPEECH_PATH)
+def speech_to_text():
+    if model is None:
+        model = whisper.load_model(os.environ.get("WHISPER_MODEL"))
+    file_name = "recording" 
+    path = os.path.join(os.getcwd(), paths.RECORDED_SPEECH_PATH + file_name +".wav")
     transcription = whisper.transcribe(model, path)
     return transcription["text"]

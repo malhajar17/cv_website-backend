@@ -1,6 +1,9 @@
 import os
+
 import mysql.connector
 from mysql.connector import Error
+
+from models.user_session_info import UserSessionInfo
 
 
 # Function to establish a database connection
@@ -52,17 +55,16 @@ def is_prohibited_user(first_name, last_name):
         cursor.close()
         connection.close()
 
-
-# Function to create a new account in the database
 def create_account(user_data):
     try:
         # Connect to the database
         connection = get_database_connection()
-
+        
         # Check if the user already exists
         if user_exists(connection, user_data["firstName"], user_data["lastName"]):
             print("User already exists")
-            return True
+            account_id = get_account_id(connection, user_data["firstName"], user_data["lastName"])
+            return account_id
 
         # Insert the new user into the database
         insert_query = (
@@ -73,17 +75,71 @@ def create_account(user_data):
         cursor.execute(insert_query, user_values)
         connection.commit()
 
+        account_id = cursor.lastrowid
+
         # Close the database connection
         connection.close()
 
         print("Account created successfully")
-        return True
+        return account_id
 
     except Error as e:
         print("Error while connecting to MySQL", e)
-        return False
+        return None
 
-    return True
+def create_session(account_id):
+    try:
+        # Connect to the database
+        connection = get_database_connection()
+
+        # Create a cursor
+        cursor = connection.cursor()
+
+        # Execute the query to insert a new session
+        query = "INSERT INTO session (accountID) VALUES (%s)"
+        cursor.execute(query, (account_id,))
+
+        # Commit the transaction
+        connection.commit()
+
+        # Get the ID of the newly created session
+        session_id = cursor.lastrowid
+
+
+        # Close the cursor and the connection
+        cursor.close()
+        connection.close()
+
+        return session_id  # Return the session ID
+
+    except mysql.connector.Error as error:
+        print(f"Error while creating session: {error}")
+        return None
+
+
+def get_account_id(connection, first_name, last_name):
+    try:
+        # Create a cursor
+        cursor = connection.cursor()
+
+        # Execute the query to get the account ID
+        query = "SELECT accountID FROM interviewee WHERE first_name = %s AND last_name = %s"
+        cursor.execute(query, (first_name, last_name))
+
+        # Fetch the result
+        result = cursor.fetchone()
+
+        # Close the cursor
+        cursor.close()
+
+        if result is not None:
+            return result[0]  # Return the account ID
+        else:
+            return None
+    except Error as e:
+        print("Error while fetching account ID", e)
+        return None
+
 
 
 def user_exists(connection, first_name, last_name):
