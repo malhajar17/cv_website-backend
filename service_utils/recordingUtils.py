@@ -54,8 +54,7 @@ def text_to_speech(text):
 
 
 def speech_to_text():
-    if model is None:
-        model = whisper.load_model(os.environ.get("WHISPER_MODEL"))
+    model = whisper.load_model(os.environ.get("WHISPER_MODEL"))
     file_name = "recording" 
     path = os.path.join(os.getcwd(), paths.RECORDED_SPEECH_PATH + file_name +".wav")
     transcription = whisper.transcribe(model, path)
