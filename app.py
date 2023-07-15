@@ -7,7 +7,7 @@ from flask_cors import CORS
 import constants.authTokens as auth
 import constants.paths as paths
 import service_utils.databaseUtils as databaseUtils
-from models.user_session_info import UserSessionInfo
+import service_utils.sessionEndUtils as sessionEndUtils
 import service_utils.authUtils as auth
 from service_utils import recordingUtils
 from service_utils.authUtils import require_token
@@ -29,9 +29,9 @@ def warmup_model():
 
 @app.route("/session_recording", methods=["POST"])
 def process_data():
-    user_info = UserSessionInfo.get_instance()
+    print(request.args.get("accountID"))
     if "file" not in request.files:
-        return jsonify({"error": "No file provided"}), 400
+         return jsonify({"error": "No file provided"}), 400
 
     file = request.files["file"]
 
@@ -39,13 +39,19 @@ def process_data():
         return jsonify({"error": "No file selected"}), 400
 
     if file and recordingUtils.allowed_file(file.filename):
-        file_name = "recording"
+        # Recieve the account info
+        accountid = request.args.get("accountID")
+        sessionID = request.args.get("sessionID")
+        sequence = request.args.get("sequence")
+
         file_path = os.path.join(os.getcwd(), "resources/client_side_recordings", file.filename)
         file.save(file_path)
 
-        # convert the webm file to a wav file
-        wav_path = os.path.splitext(file_path)[0] + ".wav"
-        recordingUtils.convert_webm_to_wav(file_path, wav_path)
+        wav_path = "re_"+ accountid+"_"+sessionID+"_" + sequence + ".wav"
+        wav_path_full = os.path.join(os.getcwd(), "resources/client_side_recordings", wav_path)
+
+
+        recordingUtils.convert_webm_to_wav(file_path, wav_path_full)
         # remove the webm file
         os.remove(file_path)
 
@@ -65,7 +71,7 @@ def interview_request():
             session_id = databaseUtils.create_session(account_id)
             print(f"Created new session with ID {session_id} for account {account_id}")
 
-        response = jsonify({"get_auth_ready": True})
+        response = jsonify({"get_auth_ready": True,"session_id":session_id,"account_id":account_id})
         return response, 200
     except Exception as e:
         print(f"Error: {e}")
@@ -81,12 +87,35 @@ def authenticate_interview():
 @app.route("/generate_response", methods=["GET"])
 @require_token
 def get_audio_response():
-    openai.api_key = os.environ.get("OPENAI_TOKEN")
-    First_user_message = recordingUtils.speech_to_text()
-    generated_text = recordingUtils.generate_text(First_user_message)
-    recordingUtils.text_to_speech(generated_text)
-    return send_file(paths.GENERATED_SPEECH_PATH + "gs_.wav", as_attachment=True)
+    accountid = request.args.get("accountID")
+    sessionID = request.args.get("sessionID")
+    sequence = request.args.get("sequence")
+    path = accountid+"_"+sessionID+"_" + sequence
 
+    openai.api_key = os.environ.get("OPENAI_TOKEN")
+    First_user_message = recordingUtils.speech_to_text(path,accountid,sessionID,sequence)
+    generated_text = recordingUtils.generate_text(First_user_message,accountid=accountid,sessionID=sessionID,sequence=sequence)
+    recordingUtils.text_to_speech(generated_text,path)
+    return send_file(paths.GENERATED_SPEECH_PATH + "gs_"+path+".wav", as_attachment=True)
+
+@app.route('/end_interview', methods=['POST'])
+@require_token
+def end_interview():
+    session_id = request.args.get('sessionID')
+    review = request.args.get('review')
+
+    recordings_path = os.path.join(os.getcwd(), "resources/client_side_recordings")
+    gs_urls, re_urls = sessionEndUtils.upload_recordings_and_get_urls(recordings_path)
+
+    UserRecordingsInfoToBeInserted = sessionEndUtils.extract_info_from_links(re_urls)
+    databaseUtils.create_recording_entries(UserRecordingsInfoToBeInserted)
+    
+    generatedRecordingsInfoToBeInserted =  sessionEndUtils.extract_info_from_links(gs_urls)
+    databaseUtils.create_ttsrecording_entries(generatedRecordingsInfoToBeInserted)
+    databaseUtils.create_review(session_id=session_id,review=review)
+    databaseUtils.update_session_end_time(session_id)
+
+    return jsonify({'End': True}), 200
 
 if __name__ == "__main__":
     app.run()
