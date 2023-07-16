@@ -46,23 +46,28 @@ def process_data():
         sequence = request.args.get("sequence")
 
         file_path = os.path.join(os.getcwd(), "resources/client_side_recordings", file.filename)
-        logging.debug(f'Saving file to: {file_path}')
+        print(f'Saving file to: {file_path}')
+
         try:
             file.save(file_path)
         except Exception as e:
-            logging.error(f'Error saving file: {e}')
+            print(f'Error saving file: {e}')
             raise e
 
         wav_path = "re_"+ accountid+"_"+sessionID+"_" + sequence + ".wav"
         wav_path_full = os.path.join(os.getcwd(), "resources/client_side_recordings", wav_path)
-        logging.debug(f'Converting webm to wav: {wav_path_full}')
+        print(f'Converting webm to wav: {wav_path_full}')
         try:
             recordingUtils.convert_webm_to_wav(file_path, wav_path_full)
         except Exception as e:
-            logging.error(f'Error converting webm to wav: {e}')
+            print(f'Error converting webm to wav: {e}')
             raise e
         # remove the webm file
         os.remove(file_path)
+        directory = os.path.join(os.getcwd(), "resources/client_side_recordings")
+
+        files_in_directory = os.listdir(directory)
+        print(files_in_directory)
 
         result = {"message": "WAV file received", "file_path": file_path}
         return jsonify(result)
