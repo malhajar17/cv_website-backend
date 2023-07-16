@@ -1,22 +1,23 @@
+import logging
 import os
 
 import openai
+import whisper
 from flask import Flask, jsonify, request, send_file
 from flask_cors import CORS
 
 import constants.authTokens as auth
 import constants.paths as paths
+import service_utils.authUtils as auth
 import service_utils.databaseUtils as databaseUtils
 import service_utils.sessionEndUtils as sessionEndUtils
-import service_utils.authUtils as auth
 from service_utils import recordingUtils
 from service_utils.authUtils import require_token
-import os
-import whisper
 
 app = Flask(__name__)
 CORS(app)
 model = None
+logging.basicConfig(level=logging.DEBUG)
 
 @app.route('/warmup-model', methods=['GET'])
 @require_token
@@ -45,13 +46,21 @@ def process_data():
         sequence = request.args.get("sequence")
 
         file_path = os.path.join(os.getcwd(), "resources/client_side_recordings", file.filename)
-        file.save(file_path)
+        logging.debug(f'Saving file to: {file_path}')
+        try:
+            file.save(file_path)
+        except Exception as e:
+            logging.error(f'Error saving file: {e}')
+            raise e
 
         wav_path = "re_"+ accountid+"_"+sessionID+"_" + sequence + ".wav"
         wav_path_full = os.path.join(os.getcwd(), "resources/client_side_recordings", wav_path)
-
-
-        recordingUtils.convert_webm_to_wav(file_path, wav_path_full)
+        logging.debug(f'Converting webm to wav: {wav_path_full}')
+        try:
+            recordingUtils.convert_webm_to_wav(file_path, wav_path_full)
+        except Exception as e:
+            logging.error(f'Error converting webm to wav: {e}')
+            raise e
         # remove the webm file
         os.remove(file_path)
 
