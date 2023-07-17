@@ -26,7 +26,9 @@ def warmup_model():
     model = whisper.load_model(os.environ.get("WHISPER_MODEL"))
     file_path = os.path.join(os.getcwd(), "resources/client_side_recordings", "silence.wav")
     whisper.transcribe(model, file_path)
-    return jsonify({"status": "Whisper model warmed up"})
+    openai.api_key = os.environ.get("OPENAI_TOKEN")
+    generated_text = recordingUtils.generate_text("Hi",accountid=1,sessionID=1,sequence=1,isWarmingUp=True)
+    return jsonify({"status": "model warmed up"})
 
 @app.route("/session_recording", methods=["POST"])
 def process_data():
@@ -106,8 +108,8 @@ def get_audio_response():
     sequence = request.args.get("sequence")
     path = accountid+"_"+sessionID+"_" + sequence
 
-    openai.api_key = os.environ.get("OPENAI_TOKEN")
     First_user_message = recordingUtils.speech_to_text(path,accountid,sessionID,sequence)
+    openai.api_key = os.environ.get("OPENAI_TOKEN")
     generated_text = recordingUtils.generate_text(First_user_message,accountid=accountid,sessionID=sessionID,sequence=sequence)
     recordingUtils.text_to_speech(generated_text,path)
     return send_file(paths.GENERATED_SPEECH_PATH + "gs_"+path+".wav", as_attachment=True)

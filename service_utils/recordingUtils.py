@@ -22,7 +22,17 @@ def allowed_file(filename):
 
 
 
-def generate_text(First_user_message,accountid,sessionID ,sequence, model=os.environ.get("OPEN_AI_MODULE"), temperature=0.3):
+def generate_text(First_user_message,accountid,sessionID ,sequence, model=os.environ.get("OPEN_AI_MODULE"), temperature=0.3,isWarmingUp=False):
+    if isWarmingUp:
+            messages = [{"role": "system", "content": "you are chatgpt"}, {"role": "assistant", "content": "Hi"}]
+            response = openai.ChatCompletion.create(
+                model=model,
+                messages=messages,
+                temperature=temperature,
+                max_tokens=1000,
+            )
+            return True
+
     prompt = prompts.MOHAMAD_PERSONA_PROMPT
 
     messages = [{"role": "system", "content": prompt}, {"role": "assistant", "content": First_user_message}]
