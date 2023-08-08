@@ -11,3 +11,4 @@ gunicorn==20.1.0
 mysql-connector-python == 8.0.33 
 PyJWT == 2.7.0
 azure-storage-blob
+replicate
