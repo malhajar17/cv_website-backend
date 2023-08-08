@@ -27,7 +27,7 @@ def warmup_model():
     file_path = os.path.join(os.getcwd(), "resources/client_side_recordings", "silence.wav")
     whisper.transcribe(model, file_path)
     openai.api_key = os.environ.get("OPENAI_TOKEN")
-    generated_text = recordingUtils.generate_text("Hi",accountid=1,sessionID=1,sequence=1,isWarmingUp=True)
+    generated_text = recordingUtils.generate_text("Hi",accountid=1,sessionID=1,sequence=1,isWarmingUp=True,type=os.environ.get("LLM_Type"))
     return jsonify({"status": "model warmed up"})
 
 @app.route("/session_recording", methods=["POST"])
