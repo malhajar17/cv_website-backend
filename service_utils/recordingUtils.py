@@ -23,7 +23,7 @@ def allowed_file(filename):
 
 
 
-def generate_text(First_user_message,accountid,sessionID ,sequence, model=os.environ.get("OPEN_AI_MODULE"), temperature=0.3,isWarmingUp=False,type="llama"):
+def generate_text(First_user_message,accountid,sessionID ,sequence, type,model=os.environ.get("OPEN_AI_MODULE"), temperature=0.3,isWarmingUp=False):
     prompt = prompts.MOHAMAD_PERSONA_PROMPT
     try:
         if type == "gpt":
@@ -57,7 +57,11 @@ def generate_text(First_user_message,accountid,sessionID ,sequence, model=os.env
                     "replicate/llama-2-70b-chat:2c1608e18606fad2812020dc541930f2d0495ce32eee50074220b87300bc16e1",
                     input={"system_prompt": prompt, "prompt": First_user_message}
                 )
-                return ''.join(list(output)).strip()
+                databaseUtils.create_gptresponse_entry(account_id=accountid, session_id=sessionID, sequence=sequence, text= ''.join(list(output)).strip())
+                print(First_user_message)
+                print(list(output))
+                return "I'm sorry, I couldn't understand that. Could you repeat it, please?"
+
 
     except Exception as e:
         # Log the error for debugging
