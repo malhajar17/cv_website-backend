@@ -110,7 +110,7 @@ def get_audio_response():
 
     First_user_message = recordingUtils.speech_to_text(path,accountid,sessionID,sequence)
     openai.api_key = os.environ.get("OPENAI_TOKEN")
-    generated_text = recordingUtils.generate_text(First_user_message,accountid=accountid,sessionID=sessionID,sequence=sequence)
+    generated_text = recordingUtils.generate_text(First_user_message,accountid=accountid,sessionID=sessionID,sequence=sequence,type=os.environ.get("LLM_Type"))
     recordingUtils.text_to_speech(generated_text,path)
     return send_file(paths.GENERATED_SPEECH_PATH + "gs_"+path+".wav", as_attachment=True)
 
@@ -133,5 +133,30 @@ def end_interview():
 
     return jsonify({'End': True}), 200
 
+@app.route('/linkedin-callback', methods=['GET'])
+def linkedin_callback():
+    # Get the authorization code from the LinkedIn redirect
+    code = request.args.get('code')
+
+    # Exchange the authorization code for an access token
+    response = post('https://www.linkedin.com/oauth/v2/accessToken', data={
+        'grant_type': 'authorization_code',
+        'code': code,
+        'client_id': os.environ.get("LINKEDIN_CLIENT_ID"),
+        'client_secret':  os.environ.get("LINKEDIN_CLIENT_SECRET") ,
+        'redirect_uri': os.environ.get("LINKEDIN_REDIRECT_URI"),
+    })
+
+    # If the request was successful, the access token will be in the 'access_token' field of the response
+    access_token = response.json().get('access_token')
+
+    if access_token:
+            
+        return jsonify({'access_token': access_token})
+
+    else:
+        # Something went wrong
+        return jsonify({'error': 'Failed to get access token'}), 400
+    
 if __name__ == "__main__":
-    app.run(host='0.0.0.0' ,debug=True)
+    app.run(host='0.0.0.0' ,debug=True,port=5001)
