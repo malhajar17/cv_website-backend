@@ -24,9 +24,10 @@ def allowed_file(filename):
 
 
 def generate_text(First_user_message,accountid,sessionID ,sequence, type,model=os.environ.get("OPEN_AI_MODULE"), temperature=0.3,isWarmingUp=False):
+    print(type)
     prompt = prompts.MOHAMAD_PERSONA_PROMPT
     try:
-        if type == "gpt":
+        if type == "gpt-3.5-turbo":
             if isWarmingUp:
                 messages = [{"role": "system", "content": "you are chatgpt"}, {"role": "assistant", "content": "Hi"}]
                 response = openai.ChatCompletion.create(
@@ -82,7 +83,6 @@ def text_to_speech(text,path):
     speech_config.speech_synthesis_language = "en-US"
     # use the default speaker as audio output.
     speech_synthesizer = speechsdk.SpeechSynthesizer(speech_config=speech_config, audio_config=audio_config)
-
     speech_synthesizer.speak_text(text)
 
 
