@@ -25,8 +25,9 @@ def allowed_file(filename):
 
 def generate_text(First_user_message,accountid,sessionID ,sequence, model=os.environ.get("OPEN_AI_MODULE"), temperature=0.3,isWarmingUp=False,type="llama"):
     prompt = prompts.MOHAMAD_PERSONA_PROMPT
-    if type == "gpt":
-        if isWarmingUp:
+    try:
+        if type == "gpt":
+            if isWarmingUp:
                 messages = [{"role": "system", "content": "you are chatgpt"}, {"role": "assistant", "content": "Hi"}]
                 response = openai.ChatCompletion.create(
                     model=model,
@@ -36,27 +37,32 @@ def generate_text(First_user_message,accountid,sessionID ,sequence, model=os.env
                 )
                 return True
 
-        prompt = prompts.MOHAMAD_PERSONA_PROMPT
+            prompt = prompts.MOHAMAD_PERSONA_PROMPT
 
-        messages = [{"role": "system", "content": prompt}, {"role": "assistant", "content": First_user_message}]
-        response = openai.ChatCompletion.create(
-            model=model,
-            messages=messages,
-            temperature=temperature,
-            max_tokens=1000,
-        )
-        databaseUtils.create_gptresponse_entry(account_id=accountid,session_id=sessionID,sequence=sequence,text=response.choices[0].message["content"])
-        return response.choices[0].message["content"]
-    elif type=="llama":
-        if isWarmingUp:
-            return True
-        else:
-            
-            output = replicate.run(
-                "replicate/llama-2-70b-chat:2c1608e18606fad2812020dc541930f2d0495ce32eee50074220b87300bc16e1",
-                input={"system_prompt": prompt,"prompt":First_user_message}
+            messages = [{"role": "system", "content": prompt}, {"role": "assistant", "content": First_user_message}]
+            response = openai.ChatCompletion.create(
+                model=model,
+                messages=messages,
+                temperature=temperature,
+                max_tokens=1000,
             )
-            return ''.join(list(output)).strip()
+            databaseUtils.create_gptresponse_entry(account_id=accountid, session_id=sessionID, sequence=sequence, text=response.choices[0].message["content"])
+            return response.choices[0].message["content"]
+
+        elif type=="llama":
+            if isWarmingUp:
+                return True
+            else:
+                output = replicate.run(
+                    "replicate/llama-2-70b-chat:2c1608e18606fad2812020dc541930f2d0495ce32eee50074220b87300bc16e1",
+                    input={"system_prompt": prompt, "prompt": First_user_message}
+                )
+                return ''.join(list(output)).strip()
+
+    except Exception as e:
+        # Log the error for debugging
+        print(f"Error encountered: {e}")
+        return "I'm sorry, I couldn't understand that. Could you repeat it, please?"
 
 def text_to_speech(text,path):
     # Creates an instance of a speech config with specified subscription key and service region.
