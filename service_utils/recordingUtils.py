@@ -23,7 +23,7 @@ def allowed_file(filename):
 
 
 
-def generate_text(First_user_message,accountid,sessionID ,sequence, model=os.environ.get("OPEN_AI_MODULE"), temperature=0.3,isWarmingUp=False,type="gpt"):
+def generate_text(First_user_message,accountid,sessionID ,sequence, model=os.environ.get("OPEN_AI_MODULE"), temperature=0.3,isWarmingUp=False,type="llama"):
     prompt = prompts.MOHAMAD_PERSONA_PROMPT
     if type == "gpt":
         if isWarmingUp:
